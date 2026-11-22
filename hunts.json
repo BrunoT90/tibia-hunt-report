@@ -1,0 +1,136 @@
+import fs from "fs";
+import { Client, GatewayIntentBits } from "discord.js";
+
+const TOKEN = process.env.DISCORD_TOKEN;
+const CHANNEL_ID = process.env.HUNT_CHANNEL_ID;
+const DATA_FILE = "./hunts.json";
+
+function parseNumber(str) {
+  return Number(String(str).replace(/,/g, "").trim());
+}
+
+export function parsePartyHunt(rawText) {
+  const lines = rawText
+    .split(/\r?\n/)
+    .map((l) => l.replace(/\r/g, ""))
+    .filter((l) => l.trim().length > 0);
+
+  const headerLine = lines.find((l) => l.startsWith("Session data:"));
+  if (!headerLine) return null;
+
+  const periodMatch = headerLine.match(
+    /Session data:\s*From\s+(\d{4}-\d{2}-\d{2},\s*\d{2}:\d{2}:\d{2})\s+to\s+(\d{4}-\d{2}-\d{2},\s*\d{2}:\d{2}:\d{2})/
+  );
+
+  const sessionMatch = rawText.match(/^Session:\s*(.+)$/m);
+  const lootTypeMatch = rawText.match(/^Loot Type:\s*(.+)$/m);
+  const lootMatch = rawText.match(/^Loot:\s*([-\d,]+)$/m);
+  const suppliesMatch = rawText.match(/^Supplies:\s*([-\d,]+)$/m);
+  const balanceMatch = rawText.match(/^Balance:\s*([-\d,]+)$/m);
+
+  if (!periodMatch || !lootMatch || !suppliesMatch || !balanceMatch) {
+    return null;
+  }
+
+  const players = [];
+  let currentPlayer = null;
+
+  for (const line of lines) {
+    // Linhas indentadas (tab ou espaços no início) pertencem ao jogador atual
+    const isIndented = /^(\t| {2,})/.test(line);
+    const trimmed = line.trim();
+
+    if (!isIndented) {
+      if (
+        trimmed.startsWith("Session data:") ||
+        trimmed.startsWith("Session:") ||
+        trimmed.startsWith("Loot Type:") ||
+        trimmed.startsWith("Loot:") ||
+        trimmed.startsWith("Supplies:") ||
+        trimmed.startsWith("Balance:")
+      ) {
+        currentPlayer = null;
+        continue;
+      }
+
+      const isLeader = /\(Leader\)$/i.test(trimmed);
+      const cleanName = trimmed.replace(/\s*\(Leader\)$/i, "").trim();
+
+      currentPlayer = {
+        name: cleanName,
+        rawName: trimmed,
+        isLeader,
+        loot: 0,
+        supplies: 0,
+        balance: 0,
+        damage: 0,
+        healing: 0,
+      };
+      players.push(currentPlayer);
+    } else if (currentPlayer) {
+      const statMatch = trimmed.match(/^(Loot|Supplies|Balance|Damage|Healing):\s*([-\d,]+)$/i);
+      if (statMatch) {
+        const key = statMatch[1].toLowerCase();
+        currentPlayer[key] = parseNumber(statMatch[2]);
+      }
+    }
+  }
+
+  const start = periodMatch[1];
+  const end = periodMatch[2];
+
+  return {
+    id: `${start}__${end}`,
+    start,
+    end,
+    duration: sessionMatch ? sessionMatch[1].trim() : "",
+    lootType: lootTypeMatch ? lootTypeMatch[1].trim() : "",
+    loot: parseNumber(lootMatch[1]),
+    supplies: parseNumber(suppliesMatch[1]),
+    balance: parseNumber(balanceMatch[1]),
+    players,
+  };
+}
+
+function loadHunts() {
+  if (!fs.existsSync(DATA_FILE)) return [];
+  try {
+    return JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
+  } catch {
+    return [];
+  }
+}
+
+function saveHunts(hunts) {
+  fs.writeFileSync(DATA_FILE, JSON.stringify(hunts, null, 2), "utf8");
+}
+
+const client = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+  ],
+});
+
+client.on("messageCreate", (message) => {
+  if (message.author.bot) return;
+  if (CHANNEL_ID && message.channelId !== CHANNEL_ID) return;
+
+  const parsed = parsePartyHunt(message.content);
+  if (!parsed) return;
+
+  const hunts = loadHunts();
+  const alreadyExists = hunts.some((h) => h.id === parsed.id);
+
+  if (alreadyExists) {
+    message.react("♻️").catch(() => {});
+    return;
+  }
+
+  hunts.unshift(parsed); // Mais recente primeiro
+  saveHunts(hunts);
+  message.react("✅").catch(() => {});
+});
+
+client.login(TOKEN);
