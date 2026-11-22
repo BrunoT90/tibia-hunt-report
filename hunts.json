@@ -1,5 +1,47 @@
 [
   {
+    "id": "2026-11-21, 23:08:51__2026-11-22, 01:51:44",
+    "start": "2026-11-21, 23:08:51",
+    "end": "2026-11-22, 01:51:44",
+    "duration": "02:42h",
+    "lootType": "Leader",
+    "loot": 7947194,
+    "supplies": 2698740,
+    "balance": 5248454,
+    "players": [
+      {
+        "name": "Lord Fugitivivo",
+        "rawName": "Lord Fugitivivo",
+        "isLeader": false,
+        "loot": 33798,
+        "supplies": 663371,
+        "balance": -629573,
+        "damage": 9494201,
+        "healing": 5552471
+      },
+      {
+        "name": "Malz Criada",
+        "rawName": "Malz Criada",
+        "isLeader": false,
+        "loot": 1976708,
+        "supplies": 905670,
+        "balance": 1071038,
+        "damage": 8565090,
+        "healing": 1541772
+      },
+      {
+        "name": "Steelhen",
+        "rawName": "Steelhen (Leader)",
+        "isLeader": true,
+        "loot": 74091,
+        "supplies": 125229,
+        "balance": -51138,
+        "damage": 11839399,
+        "healing": 423941
+      }
+    ]
+  },
+  {
     "id": "2026-11-21, 17:15:48__2026-11-21, 18:28:35",
     "start": "2026-11-21, 17:15:48",
     "end": "2026-11-21, 18:28:35",
