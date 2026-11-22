@@ -1,1 +1,54 @@
-[]
+[
+  {
+    "id": "2026-11-21, 17:15:48__2026-11-21, 18:28:35",
+    "start": "2026-11-21, 17:15:48",
+    "end": "2026-11-21, 18:28:35",
+    "duration": "01:12h",
+    "lootType": "Leader",
+    "loot": 3566024,
+    "supplies": 1157858,
+    "balance": 2408166,
+    "players": [
+      {
+        "name": "Lord Fugitivivo",
+        "rawName": "Lord Fugitivivo",
+        "isLeader": false,
+        "loot": 37724,
+        "supplies": 273346,
+        "balance": -235622,
+        "damage": 4484461,
+        "healing": 2286518
+      },
+      {
+        "name": "Malz Criada",
+        "rawName": "Malz Criada",
+        "isLeader": false,
+        "loot": 1118470,
+        "supplies": 376106,
+        "balance": 742364,
+        "damage": 3838723,
+        "healing": 872432
+      },
+      {
+        "name": "Steelhen",
+        "rawName": "Steelhen (Leader)",
+        "isLeader": true,
+        "loot": 2299971,
+        "supplies": 289762,
+        "balance": 2010209,
+        "damage": 3045340,
+        "healing": 586863
+      },
+      {
+        "name": "Thor Isback",
+        "rawName": "Thor Isback",
+        "isLeader": false,
+        "loot": 109859,
+        "supplies": 218644,
+        "balance": -108785,
+        "damage": 5289427,
+        "healing": 909923
+      }
+    ]
+  }
+]
